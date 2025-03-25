@@ -1,0 +1,15 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["cypress", "node"],
+    "isolatedModules": true,
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "composite": true,
+    "declaration": true,
+    "noEmit": false,
+    "outDir": "dist",
+    "allowImportingTsExtensions": false
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}

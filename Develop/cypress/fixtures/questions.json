@@ -1,0 +1,20 @@
+[
+  {
+    "question": "What does HTML stand for?",
+    "answers": [
+      { "text": "Hyper Text Markup Language", "isCorrect": true },
+      { "text": "High Tech Modern Language", "isCorrect": false },
+      { "text": "Hyper Transfer Markup Language", "isCorrect": false },
+      { "text": "Home Tool Markup Language", "isCorrect": false }
+    ]
+  },
+  {
+    "question": "Which of the following is a JavaScript framework?",
+    "answers": [
+      { "text": "Python", "isCorrect": false },
+      { "text": "React", "isCorrect": true },
+      { "text": "Java", "isCorrect": false },
+      { "text": "HTML", "isCorrect": false }
+    ]
+  }
+]
