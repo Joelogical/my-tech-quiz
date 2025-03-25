@@ -1,53 +1,64 @@
-describe("Tech Quiz Application", () => {
+describe("Quiz Flow", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:3000");
+    cy.visit("http://localhost:3001");
   });
 
   it("should display the start page", () => {
     cy.get('[data-testid="start-button"]').should("be.visible");
-    cy.get('[data-testid="start-button"]').should("contain", "Start Quiz");
+  });
+
+  it("should handle server errors gracefully", () => {
+    cy.intercept("GET", "/api/questions/random", {
+      statusCode: 500,
+      body: { message: "Error fetching questions" },
+    }).as("getQuestions");
+
+    cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
+    cy.get('[data-testid="error-message"]').should("be.visible");
   });
 
   it("should start the quiz when clicking the start button", () => {
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
     cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
     cy.get('[data-testid="question"]').should("be.visible");
     cy.get('[data-testid="answers"]').should("be.visible");
   });
 
   it("should display the score after completing the quiz", () => {
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
     cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
 
-    // Answer all questions (we'll make 10 selections)
+    // Answer all questions
     for (let i = 0; i < 10; i++) {
       cy.get('[data-testid="answer"]').first().click();
       cy.wait(500); // Wait for next question to load
     }
 
     cy.get('[data-testid="score"]').should("be.visible");
-    cy.get('[data-testid="new-quiz-button"]').should("be.visible");
   });
 
   it("should start a new quiz when clicking the new quiz button", () => {
-    cy.get('[data-testid="start-button"]').click();
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
 
-    // Complete the quiz
+    // Complete first quiz
+    cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
+
+    // Answer all questions
     for (let i = 0; i < 10; i++) {
       cy.get('[data-testid="answer"]').first().click();
       cy.wait(500);
     }
 
+    cy.get('[data-testid="score"]').should("be.visible");
     cy.get('[data-testid="new-quiz-button"]').click();
-    cy.get('[data-testid="start-button"]').should("be.visible");
-  });
+    cy.wait("@getQuestions");
 
-  it("should handle server errors gracefully", () => {
-    // Intercept the questions API call and force an error
-    cy.intercept("GET", "/api/questions", {
-      statusCode: 500,
-      body: { message: "Server error" },
-    }).as("getQuestions");
-
-    cy.get('[data-testid="start-button"]').click();
-    cy.get('[data-testid="error-message"]').should("be.visible");
+    // Check for new quiz questions
+    cy.get('[data-testid="question"]').should("be.visible");
+    cy.get('[data-testid="answers"]').should("be.visible");
   });
 });

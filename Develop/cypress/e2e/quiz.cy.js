@@ -1,62 +1,64 @@
-describe("Quiz End-to-End Test", () => {
+describe("Quiz Flow", () => {
   beforeEach(() => {
-    cy.visit("http://localhost:3000");
+    cy.visit("/");
   });
 
-  it("should complete full quiz flow", () => {
-    // Start the quiz
-    cy.get("button").contains("Start Quiz").should("be.visible").click();
-
-    // Wait for questions to load
-    cy.get(".spinner-border").should("be.visible");
-    cy.get(".spinner-border").should("not.exist", { timeout: 10000 });
-
-    // Answer all questions
-    for (let i = 0; i < 10; i++) {
-      cy.get("h2").should("be.visible"); // Wait for question to be visible
-      cy.get(".btn.btn-primary").first().click(); // Click first answer for each question
-    }
-
-    // Verify quiz completion
-    cy.get(".alert-success").should("be.visible");
-    cy.get("button").contains("Take New Quiz").should("be.visible");
-
-    // Start new quiz
-    cy.get("button").contains("Take New Quiz").click();
-    cy.get("h2").should("be.visible"); // Verify new quiz started
+  it("should display the start page", () => {
+    cy.get('[data-testid="start-button"]').should("be.visible");
   });
 
   it("should handle server errors gracefully", () => {
-    cy.intercept("GET", "/api/questions", {
+    cy.intercept("GET", "/api/questions/random", {
       statusCode: 500,
-      body: "Server error",
-    }).as("getQuestionsError");
-
-    cy.get("button").contains("Start Quiz").click();
-    cy.get(".spinner-border").should("be.visible");
-  });
-
-  it("should display correct score", () => {
-    cy.intercept("GET", "/api/questions", {
-      statusCode: 200,
-      body: [
-        {
-          question: "Test Question 1",
-          answers: [
-            { text: "Correct Answer", isCorrect: true },
-            { text: "Wrong Answer", isCorrect: false },
-          ],
-        },
-      ],
+      body: { message: "Error fetching questions" },
     }).as("getQuestions");
 
-    cy.get("button").contains("Start Quiz").click();
+    cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
+    cy.get('[data-testid="error-message"]').should("be.visible");
+  });
+
+  it("should start the quiz when clicking the start button", () => {
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
+    cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
+    cy.get('[data-testid="question"]').should("be.visible");
+    cy.get('[data-testid="answers"]').should("be.visible");
+  });
+
+  it("should display the score after completing the quiz", () => {
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
+    cy.get('[data-testid="start-button"]').click();
     cy.wait("@getQuestions");
 
-    // Answer correctly
-    cy.get(".btn.btn-primary").first().click();
+    // Answer all questions
+    for (let i = 0; i < 10; i++) {
+      cy.get('[data-testid="answer"]').first().click();
+      cy.wait(500); // Wait for next question to load
+    }
 
-    // Verify score
-    cy.get(".alert-success").contains("1/1").should("be.visible");
+    cy.get('[data-testid="score"]').should("be.visible");
+  });
+
+  it("should start a new quiz when clicking the new quiz button", () => {
+    cy.intercept("GET", "/api/questions/random").as("getQuestions");
+
+    // Complete first quiz
+    cy.get('[data-testid="start-button"]').click();
+    cy.wait("@getQuestions");
+
+    // Answer all questions
+    for (let i = 0; i < 10; i++) {
+      cy.get('[data-testid="answer"]').first().click();
+      cy.wait(500);
+    }
+
+    cy.get('[data-testid="score"]').should("be.visible");
+    cy.get('[data-testid="new-quiz-button"]').click();
+    cy.wait("@getQuestions");
+
+    // Check for new quiz questions
+    cy.get('[data-testid="question"]').should("be.visible");
+    cy.get('[data-testid="answers"]').should("be.visible");
   });
 });

@@ -1,7 +1,16 @@
 import { db } from "../config/connection.js";
 import { Question } from "../models/index.js";
 import cleanDB from "./cleanDb.js";
-import questionData from "./pythonQuestions.json" assert { type: "json" };
+import fs from "fs";
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+const questionData = JSON.parse(
+  fs.readFileSync(path.join(__dirname, "pythonQuestions.json"), "utf-8")
+);
 
 const seedDatabase = async () => {
   try {
