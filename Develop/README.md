@@ -59,10 +59,6 @@ npm run test:open
 - Implemented error handling scenarios
 - Achieved full test coverage of user flows
 
-## Video Demo
-
-[Coming soon! Video demonstration of test execution and application functionality]
-
 ## Technology Stack
 
 - Frontend: React
@@ -74,6 +70,9 @@ npm run test:open
 
 You can find the complete source code and test implementation at my
 [GitHub Repository](https://github.com/Joelogical/my-tech-quiz.git)
+
+## Video Demo
+[Click here for the demo video!](https://drive.google.com/file/d/1GcJ5R8GOkZiEnbMQnDN-rVOZMrr0cUpq/view?usp=sharing)
 
 ## Contact
 
